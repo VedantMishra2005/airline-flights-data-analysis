@@ -1,0 +1,133 @@
+import pandas as pd 
+import matplotlib.pyplot as plt
+
+df= pd.read_csv("airlines_flights_data.csv")
+
+#Q.1. What are the airlines in the dataset, accompanied by their frequencies?
+airlines_count=df["airline"].value_counts()
+print(airlines_count)
+airlines_count.plot(kind="pie", figsize=(10,5), color="skyblue")
+plt.title("Airlines Frequencies")
+plt.xlabel("Airlines")
+plt.ylabel("Number of Flights")
+plt.show()
+
+
+# Q.2. Show Bar Graphs representing the Departure Time & Arrival Time.
+Departure_count=df["departure_time"].value_counts()
+print(Departure_count)
+
+Arrival_count=df["arrival_time"].value_counts()
+print(Arrival_count)
+
+Departure_count.plot(kind='bar',figsize=(10,5))
+plt.title("Departure Time Frequencies")
+plt.xlabel("departure time")
+plt.ylabel("Number of flights")
+plt.show()
+
+Arrival_count.plot(kind="bar",figsize=(10,5))
+plt.title("Arrival Time Frequencies")
+plt.xlabel("Arrival Time")
+plt.ylabel("Number of Flights")
+plt.show()
+
+
+# Q.3. Show Bar Graphs representing the Source City & Destination City.
+source_count= df["source_city"].value_counts()
+print(source_count)
+
+destination_count=df["destination_city"].value_counts()
+print(destination_count)
+
+source_count.plot(kind="bar",figsize=(8,4))
+plt.title("Source City Frequencies")
+plt.xlabel("Source city ")
+plt.ylabel("Number of flights")
+plt.show()
+
+destination_count.plot(kind="bar",figsize=(8,4))
+plt.title(" Destination City Frequencies")
+plt.xlabel("Destination City ")
+plt.ylabel("Number of flights")
+plt.show()
+
+
+# Q.4. Does price varies with airlines ?
+airline_price=df.groupby("airline")["price"].mean()
+print(airline_price)
+
+# Q.5. Does ticket price change based on the departure time and arrival time?
+departure_ticket = df.groupby("departure_time")["price"].mean()
+print(departure_ticket)
+arrival_ticket= df.groupby("arrival_time")["price"].mean()
+print(arrival_ticket)    
+
+departure_ticket.plot(kind="bar", color="orange",figsize=(8,4))
+plt.title("Average Ticket Price by Departure Time")
+plt.xlabel("Departure Time")
+plt.ylabel("Average Price")
+plt.show()
+
+arrival_ticket.plot(kind="bar", color="green",figsize=(8,4))
+plt.title("Average Ticket Price by Arrival Time")
+plt.xlabel("Arrival Time")
+plt.ylabel("Average Price")
+plt.show()
+
+
+# Q.6. How the price changes with change in Source and Destination?
+
+df["route"]=df["source_city"]+"->"+df["destination_city"]
+route_price=df.groupby("route")["price"].mean().sort_values()
+print(route_price)
+
+route_price.plot(kind="bar", figsize=(14,6))
+plt.title("Average Ticket Price by Route")
+plt.xlabel("Route (Source → Destination)")
+plt.ylabel("Average Price")
+plt.xticks(rotation=60, ha="right")
+plt.show()
+
+# Q.7. How is the price affected when tickets are bought in just 1 or 2 days before departure?
+last_min = df[df["days_left"]<=2]["price"]
+early_booking=df[df["days_left"]>2]["price"]
+
+
+avg_ticket={
+    "last minutes(1-2)":last_min.mean(),
+    "early_booking(>2 days)":early_booking.mean()
+
+}
+
+plt.bar(avg_ticket.keys(),avg_ticket.values(),color=["red","green"])
+plt.title("Effect of last minutes booking on ticket price")
+plt.ylabel("Average Ticket Price")
+plt.show()
+
+
+# Q.8. How does the ticket price vary between Economy and Business class?
+avg_price=df.groupby("class")["price"].mean()
+
+avg_price.plot(kind="bar",figsize=(6,4),color=["yellow","green"])
+plt.title("ticket price vary between Economy and Business class")
+plt.ylabel("Average Ticket Price")
+plt.xlabel("class")
+plt.show()
+
+# Q.9. What will be the Average Price of Vistara airline for a flight from Delhi to Hyderabad in Business Class ?
+vistara_business=df[
+    (df["airline"]=="Vistara")&
+    (df["source_city"]=="Delhi")&
+    (df["destination_city"]=="Hyderabad")&
+    (df["class"]=="Business")
+]
+
+avg_price=vistara_business["price"].mean()
+print("Average Price of Vistara (Delhi → Hyderabad, Business Class):\n", avg_price)
+
+if vistara_business.empty:
+    print("No flights found for Vistara (Delhi → Hyderabad, Business Class).")
+else:
+    avg_price = vistara_business["price"].mean()
+    print("Average Price of Vistara (Delhi → Hyderabad, Business Class):", avg_price)
